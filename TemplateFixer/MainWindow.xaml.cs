@@ -24,5 +24,25 @@ namespace TemplateFixer
         {
             InitializeComponent();
         }
+
+        private void Search_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Test_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Fix_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Clean_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

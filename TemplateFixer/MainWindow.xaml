@@ -22,16 +22,16 @@
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal" Grid.ColumnSpan="3">
             <Label Content="Base path:" />
-            <TextBox Width="250" />
+            <TextBox x:Name="BasePath" Width="250" VerticalContentAlignment="Center" Text=""/>
             <Label Content="Search pattern:" />
-            <TextBox Width="250" />
+            <TextBox x:Name="SearchPattern" Width="250" Text="template-with-new-rg.json" VerticalContentAlignment="Center"/>
         </StackPanel>
-        <Button Content="Search" Width="100" HorizontalAlignment="Center" Grid.Row="1" />
-        <ListBox Grid.Row="2" />
-        <Button Content="Test" Width="100" HorizontalAlignment="Center" Grid.Row="3" />
-        <Button Content="Fix" Width="100" HorizontalAlignment="Center" Grid.Row="4" />
-        <Button Content="Clean" Width="100" HorizontalAlignment="Center" Grid.Row="5" />
-        <ListBox Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" />
-        <ListBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" />
+        <Button Content="Search" Width="100" HorizontalAlignment="Center" Grid.Row="1" Click="Search_Click" />
+        <ListBox x:Name="SearchResults" Grid.Row="2" />
+        <Button Content="Test" Width="100" HorizontalAlignment="Center" Grid.Row="3" Click="Test_Click" />
+        <Button Content="Fix" Width="100" HorizontalAlignment="Center" Grid.Row="4" Click="Fix_Click" />
+        <Button Content="Clean" Width="100" HorizontalAlignment="Center" Grid.Row="5" Click="Clean_Click" />
+        <ListBox x:Name="ResultPaths" Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" />
+        <TextBlock x:Name="JsonCode" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" />
     </Grid>
 </Window>
