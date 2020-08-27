@@ -7,6 +7,31 @@
         mc:Ignorable="d"
         Title="Template Fixer" Height="450" Width="800">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.ColumnSpan="3">
+            <Label Content="Base path:" />
+            <TextBox Width="250" />
+            <Label Content="Search pattern:" />
+            <TextBox Width="250" />
+        </StackPanel>
+        <Button Content="Search" Width="100" HorizontalAlignment="Center" Grid.Row="1" />
+        <ListBox Grid.Row="2" />
+        <Button Content="Test" Width="100" HorizontalAlignment="Center" Grid.Row="3" />
+        <Button Content="Fix" Width="100" HorizontalAlignment="Center" Grid.Row="4" />
+        <Button Content="Clean" Width="100" HorizontalAlignment="Center" Grid.Row="5" />
+        <ListBox Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" />
+        <ListBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" />
     </Grid>
 </Window>
