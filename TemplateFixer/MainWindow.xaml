@@ -6,12 +6,24 @@
         xmlns:local="clr-namespace:TemplateFixer"
         mc:Ignorable="d"
         Title="Template Fixer" Height="450" Width="800">
+    <Window.Resources>
+        <Style x:Key="DisplayBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="IsEnabled" Value="False" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -26,12 +38,12 @@
             <Label Content="Search pattern:" />
             <TextBox x:Name="SearchPattern" Width="250" Text="template-with-new-rg.json" VerticalContentAlignment="Center"/>
         </StackPanel>
-        <Button Content="Search" Width="100" HorizontalAlignment="Center" Grid.Row="1" Click="Search_Click" />
-        <ListBox x:Name="SearchResults" Grid.Row="2" />
-        <Button Content="Test" Width="100" HorizontalAlignment="Center" Grid.Row="3" Click="Test_Click" />
-        <Button Content="Fix" Width="100" HorizontalAlignment="Center" Grid.Row="4" Click="Fix_Click" />
-        <Button Content="Clean" Width="100" HorizontalAlignment="Center" Grid.Row="5" Click="Clean_Click" />
-        <ListBox x:Name="ResultPaths" Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" />
-        <TextBlock x:Name="JsonCode" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" />
+        <Button Content="Clean" Width="100" HorizontalAlignment="Center" Grid.Row="1" Click="Clean_Click" />
+        <Button Content="Search" Width="100" HorizontalAlignment="Center" Grid.Row="2" Click="Search_Click" />
+        <ListBox x:Name="SearchResults" Grid.Row="3" SelectionMode="Extended" SelectionChanged="SearchResults_SelectionChanged" />
+        <Button Content="Test" Width="100" HorizontalAlignment="Center" Grid.Row="4" Click="Test_Click" />
+        <Button Content="Fix" Width="100" HorizontalAlignment="Center" Grid.Row="5" Click="Fix_Click" />
+        <TextBox x:Name="ResultPaths" Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" Style="{StaticResource DisplayBox}" />
+        <TextBox x:Name="JsonCode" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" FontFamily="Consolas" Style="{StaticResource DisplayBox}" />
     </Grid>
 </Window>
