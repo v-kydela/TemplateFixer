@@ -23,27 +23,27 @@ namespace TemplateFixer
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            ConsoleHelper.WriteLine($"Template Fixer encountered an error. {((Exception)e.ExceptionObject).Message}");
+            Console.WriteLine($"Template Fixer encountered an error. {((Exception)e.ExceptionObject).Message}");
         }
 
         private void Clean_Click(object sender, RoutedEventArgs e)
         {
             if (AzHelper.CheckLoginFailure()) return;
 
-            ConsoleHelper.WriteLine("Cleaning resource groups and app registrations...");
+            Console.WriteLine("Cleaning resource groups and app registrations...");
 
             var rgTask = ListAndDelete("resource group", AzHelper.ListResourceGroups, AzHelper.DeleteResourceGroup);
             var appTask = ListAndDelete("app registration", AzHelper.ListAppRegistrations, AzHelper.DeleteAppRegistration);
 
             Task.WaitAll(rgTask, appTask);
 
-            ConsoleHelper.WriteLine("Finished cleaning");
+            Console.WriteLine("Finished cleaning");
 
             static Task ListAndDelete(string itemType, Func<IEnumerable<string>> listFunc, Func<string, ProcessResult> deleteFunc)
             {
                 return Task.Run(() =>
                 {
-                    ConsoleHelper.WriteLine($"Checking {itemType}s...");
+                    Console.WriteLine($"Checking {itemType}s...");
 
                     var items = listFunc();
 
@@ -54,31 +54,31 @@ namespace TemplateFixer
                         return;
                     }
 
-                    ConsoleHelper.WriteLine($"Deleting {items.Count()} {itemType}(s)...");
+                    Console.WriteLine($"Deleting {items.Count()} {itemType}(s)...");
 
                     var loopResult = Parallel.ForEach(items, (item, state, index) =>
                     {
-                        ConsoleHelper.WriteLine($"Deleting {itemType}: {item}");
+                        Console.WriteLine($"Deleting {itemType}: {item}");
 
                         var deleteResult = deleteFunc(item);
 
                         if (deleteResult.ExitCode == 0)
                         {
-                            ConsoleHelper.WriteLine($"{item} deleted successfully");
+                            Console.WriteLine($"{item} deleted successfully");
                         }
                         else
                         {
-                            ConsoleHelper.WriteLine($"Couldn't delete {item}");
+                            Console.WriteLine($"Couldn't delete {item}");
                         }
                     });
 
                     if (loopResult.IsCompleted)
                     {
-                        ConsoleHelper.WriteLine($"Finished deleting {items.Count()} {itemType}(s)");
+                        Console.WriteLine($"Finished deleting {items.Count()} {itemType}(s)");
                     }
                     else
                     {
-                        ConsoleHelper.WriteLine($"Couldn't delete all {itemType}s");
+                        Console.WriteLine($"Couldn't delete all {itemType}s");
                     }
                 });
             }
@@ -91,7 +91,7 @@ namespace TemplateFixer
             var directory = BasePath.Text;
             var searchPattern = SearchPattern.Text;
 
-            ConsoleHelper.WriteLine($"Searching {directory} for {searchPattern}");
+            Console.WriteLine($"Searching {directory} for {searchPattern}");
 
             var fileArray = Directory.GetFiles(directory, searchPattern, SearchOption.AllDirectories);
             var files = fileArray.Where(file => new[] { @"\bin\", @"\obj\" }.All(segment => !file.Contains(segment)));
@@ -126,7 +126,7 @@ namespace TemplateFixer
                 fileTemplate.Paths.Add(file);
             }
 
-            ConsoleHelper.WriteLine($"Found {SearchResults.Items.Count} distinct results in {files.Count()} total results");
+            Console.WriteLine($"Found {SearchResults.Items.Count} distinct results in {files.Count()} total results");
         }
 
         private void Test_Click(object sender, RoutedEventArgs e)
@@ -135,18 +135,18 @@ namespace TemplateFixer
 
             if (selection.Count() == 0)
             {
-                ConsoleHelper.WriteLine("No templates selected");
+                Console.WriteLine("No templates selected");
 
                 return;
             }
 
             if (AzHelper.CheckLoginFailure()) return;
 
-            ConsoleHelper.WriteLine($"Testing {selection.Count()} template(s)...");
+            Console.WriteLine($"Testing {selection.Count()} template(s)...");
 
             var loopResult = Parallel.ForEach(selection, (template, state, index) =>
             {
-                ConsoleHelper.WriteLine($"Creating app registration for {template.GetName()}");
+                Console.WriteLine($"Creating app registration for {template.GetName()}");
 
                 var appResult = AzHelper.CreateAppRegistration(index);
 
@@ -154,22 +154,22 @@ namespace TemplateFixer
                 {
                     var appId = JObject.Parse(appResult.Output)[Properties.AppId].ToString();
 
-                    ConsoleHelper.WriteLine($"Deploying {template.GetName()} with app ID {appId}");
+                    Console.WriteLine($"Deploying {template.GetName()} with app ID {appId}");
 
                     var deployResult = AzHelper.Deploy(template, appId, index);
 
                     if (deployResult.ExitCode == 0)
                     {
-                        ConsoleHelper.WriteLine($"{template.GetName()} deployment successful");
+                        Console.WriteLine($"{template.GetName()} deployment successful");
                     }
                     else
                     {
-                        ConsoleHelper.WriteLine($"{template.GetName()} deployment failed");
+                        Console.WriteLine($"{template.GetName()} deployment failed");
                     }
                 }
                 else
                 {
-                    ConsoleHelper.WriteLine($"Couldn't create app registration for {template.GetName()}. Try cleaning first.");
+                    Console.WriteLine($"Couldn't create app registration for {template.GetName()}. Try cleaning first.");
 
                     state.Stop();
                 }
@@ -177,11 +177,11 @@ namespace TemplateFixer
 
             if (loopResult.IsCompleted)
             {
-                ConsoleHelper.WriteLine($"Finished testing {selection.Count()} template(s)");
+                Console.WriteLine($"Finished testing {selection.Count()} template(s)");
             }
             else
             {
-                ConsoleHelper.WriteLine("Testing did not complete successfully");
+                Console.WriteLine("Testing did not complete successfully");
             }
         }
 

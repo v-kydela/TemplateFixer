@@ -82,6 +82,8 @@ namespace TemplateFixer
 
             process.WaitForExit();
 
+            Console.ResetColor();
+
             return new ProcessResult(
                 output,
                 process.ExitCode);
