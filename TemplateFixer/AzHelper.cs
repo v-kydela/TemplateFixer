@@ -36,7 +36,7 @@ namespace TemplateFixer
 
         internal static ProcessResult Deploy(DistinctTemplate template, string appId, long index) =>
             Run($"deployment sub create"
-                + $" --template-file \"{template.ExampleFile}\""
+                + $" --template-file \"{template.Paths.First()}\""
                 + $" --location {Location}"
                 + $" --parameters"
                     + $" appId=\"{appId}\""

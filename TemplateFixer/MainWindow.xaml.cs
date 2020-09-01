@@ -118,13 +118,12 @@ namespace TemplateFixer
                     {
                         Index = SearchResults.Items.Count,
                         JObject = fileJObject,
-                        ExampleFile = file,
                     };
 
                     SearchResults.Items.Add(fileTemplate);
                 }
                 
-                fileTemplate.Paths.Add(file.Replace(directory, string.Empty).Replace(searchPattern, string.Empty));
+                fileTemplate.Paths.Add(file);
             }
 
             ConsoleHelper.WriteLine($"Found {SearchResults.Items.Count} distinct results in {files.Count()} total results");
@@ -199,16 +198,11 @@ namespace TemplateFixer
                 Environment.NewLine,
                 selection.Select(template => string.Join(
                     Environment.NewLine,
-                    template.Paths)));
+                    template.Paths.Select(path => path
+                        .Replace(BasePath.Text, string.Empty)
+                        .Replace(SearchPattern.Text, string.Empty)))));
 
-            if (selection.Count() == 1)
-            {
-                JsonCode.Text = selection.Single().JObject.ToString();
-            }
-            else
-            {
-                JsonCode.Text = string.Empty;
-            }
+            JsonCode.Text = selection.Count() == 1 ? selection.Single().JObject.ToString() : string.Empty;
         }
     }
 }

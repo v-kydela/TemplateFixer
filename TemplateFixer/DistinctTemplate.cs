@@ -9,8 +9,6 @@ namespace TemplateFixer
 
         public JObject JObject { get; set; }
 
-        public string ExampleFile { get; set; }
-
         public ICollection<string> Paths { get; } = new HashSet<string>();
 
         public string GetName() => $"Type {(char)(Index + 65)}";
