@@ -144,11 +144,11 @@ namespace TemplateFixer
 
             Console.WriteLine($"Testing {selection.Count()} template(s)...");
 
-            var loopResult = Parallel.ForEach(selection, (template, state, index) =>
+            var loopResult = Parallel.ForEach(selection, (template, state) =>
             {
                 Console.WriteLine($"Creating app registration for {template.GetName()}");
 
-                var appResult = AzHelper.CreateAppRegistration(index);
+                var appResult = AzHelper.CreateAppRegistration(template.Index);
 
                 if (appResult.ExitCode == 0)
                 {
@@ -156,7 +156,7 @@ namespace TemplateFixer
 
                     Console.WriteLine($"Deploying {template.GetName()} with app ID {appId}");
 
-                    var deployResult = AzHelper.Deploy(template, appId, index);
+                    var deployResult = AzHelper.Deploy(template, appId, template.Index);
 
                     if (deployResult.ExitCode == 0)
                     {
