@@ -145,7 +145,7 @@ namespace TemplateFixer
 
             Console.WriteLine($"Testing {selection.Count()} template(s)...");
 
-            var loopResult = Parallel.ForEach(selection, (template, state) =>
+            var loopResult = Parallel.ForEach(selection, (template) =>
             {
                 Console.WriteLine($"Creating app registration for {template.GetName()}");
 
@@ -171,8 +171,6 @@ namespace TemplateFixer
                 else
                 {
                     Console.WriteLine($"Couldn't create app registration for {template.GetName()}. Try cleaning first.");
-
-                    state.Stop();
                 }
             });
 
@@ -210,22 +208,43 @@ namespace TemplateFixer
                     template.JObject["variables"]["resourceGroupId"] = "[concat(subscription().id, '/resourceGroups/', parameters('groupName'))]";
                 }
 
-                foreach (var resource in template
-                    .JObject["resources"]
-                    .First(resource => resource["type"].ToString() == "Microsoft.Resources/deployments")["properties"]["template"]["resources"])
+                foreach (var token in template.JObject.Descendants()
+                    .Select(token => token.Parent is JArray arr && arr.Parent is JProperty prop && prop.Name == "dependsOn" ? token as JValue : null)
+                    .ToList())
                 {
-                    if (resource["dependsOn"]?.FirstOrDefault()?.ToString() is string dependency && dependency.StartsWith("[resourceId('Microsoft.Web"))
-                    {
-                        Console.WriteLine($"Modifying 'dependsOn' array for {resource["type"]} in {template.GetName()}");
+                    var tokenString = token?.ToString();
 
-                        resource["dependsOn"][0] = dependency.Replace("resourceId('", "concat(variables('resourceGroupId'), '/providers/");
+                    // Ignore the "root" dependsOn array that just waits for the deployment of the resource group
+                    if (tokenString?.Contains("Microsoft.Resources/resourceGroups") == false)
+                    {
+                        if (tokenString.StartsWith("[resourceId"))
+                        {
+                            Console.WriteLine($"Changing resourceId to concat in {template.GetName()}");
+
+                            tokenString = tokenString.Replace("resourceId('", "concat(variables('resourceGroupId'), '/providers/");
+                            token.Value = tokenString;
+                        }
+
+                        if (tokenString.StartsWith("[concat"))
+                        {
+                            var indexOfEndQuote = tokenString.IndexOf("',");
+
+                            if (indexOfEndQuote > 0 && tokenString[indexOfEndQuote - 1] != '/')
+                            {
+                                Console.WriteLine($"Adding missing slash to {template.GetName()}");
+                                
+                                token.Value = tokenString.Insert(indexOfEndQuote, "/");
+                            }
+                        }
                     }
                 }
 
-                Console.WriteLine($"Writing changes to {template.Paths.Count()} files for {template.GetName()}");
+                Console.WriteLine($"Writing changes to {template.Paths.Count()} file(s) for {template.GetName()}");
 
                 var innerLoopResult = Parallel.ForEach(template.Paths, path =>
                 {
+                    // This seems to be the easiest way to specify the tab size
+                    // when serializing JSON
                     using var fs = File.Open(path, FileMode.Open);
                     using var sw = new StreamWriter(fs);
                     using var jw = new JsonTextWriter(sw)
@@ -240,7 +259,7 @@ namespace TemplateFixer
 
                 if (innerLoopResult.IsCompleted)
                 {
-                    Console.WriteLine($"Finished writing changes to {template.Paths.Count()} files for {template.GetName()}");
+                    Console.WriteLine($"Finished writing changes to {template.Paths.Count()} file(s) for {template.GetName()}");
                 }
                 else
                 {
