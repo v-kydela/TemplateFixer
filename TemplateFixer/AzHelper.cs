@@ -23,7 +23,7 @@ namespace TemplateFixer
                 .Select(group => group[Properties.Name].ToString())
                 .Where(name => name.StartsWith(RgPrefix));
 
-        internal static ProcessResult DeleteResourceGroup(string name) => Run($"group delete -n {name}");
+        internal static ProcessResult DeleteResourceGroup(string name) => Run($"group delete -n {name} -y");
 
         internal static IEnumerable<string> ListAppRegistrations() =>
             JArray.Parse(Run($"ad app list --filter \"startswith(displayName, '{ResourceName}')\"").Output)
