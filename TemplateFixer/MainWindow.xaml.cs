@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -187,7 +188,74 @@ namespace TemplateFixer
 
         private void Fix_Click(object sender, RoutedEventArgs e)
         {
+            var selection = SearchResults.SelectedItems.Cast<DistinctTemplate>();
 
+            if (selection.Count() == 0)
+            {
+                Console.WriteLine("No templates selected");
+
+                return;
+            }
+
+            Console.WriteLine($"Fixing {selection.Count()} template(s)...");
+
+            var loopResult = Parallel.ForEach(selection, template =>
+            {
+                Console.WriteLine($"Fixing {template.GetName()}");
+
+                if (template.JObject["variables"]["resourceGroupId"] is null)
+                {
+                    Console.WriteLine($"Adding resourceGroupId variable to {template.GetName()}");
+
+                    template.JObject["variables"]["resourceGroupId"] = "[concat(subscription().id, '/resourceGroups/', parameters('groupName'))]";
+                }
+
+                foreach (var resource in template
+                    .JObject["resources"]
+                    .First(resource => resource["type"].ToString() == "Microsoft.Resources/deployments")["properties"]["template"]["resources"])
+                {
+                    if (resource["dependsOn"]?.FirstOrDefault()?.ToString() is string dependency && dependency.StartsWith("[resourceId('Microsoft.Web"))
+                    {
+                        Console.WriteLine($"Modifying 'dependsOn' array for {resource["type"]} in {template.GetName()}");
+
+                        resource["dependsOn"][0] = dependency.Replace("resourceId('", "concat(variables('resourceGroupId'), '/providers/");
+                    }
+                }
+
+                Console.WriteLine($"Writing changes to {template.Paths.Count()} files for {template.GetName()}");
+
+                var innerLoopResult = Parallel.ForEach(template.Paths, path =>
+                {
+                    using var fs = File.Open(path, FileMode.Open);
+                    using var sw = new StreamWriter(fs);
+                    using var jw = new JsonTextWriter(sw)
+                    {
+                        Formatting = Formatting.Indented,
+                        IndentChar = ' ',
+                        Indentation = 4
+                    };
+
+                    template.JObject.WriteTo(jw);
+                });
+
+                if (innerLoopResult.IsCompleted)
+                {
+                    Console.WriteLine($"Finished writing changes to {template.Paths.Count()} files for {template.GetName()}");
+                }
+                else
+                {
+                    Console.WriteLine($"Couldn't write all changes for {template.GetName()}");
+                }
+            });
+
+            if (loopResult.IsCompleted)
+            {
+                Console.WriteLine($"Finished fixing {selection.Count()} template(s)");
+            }
+            else
+            {
+                Console.WriteLine("Couldn't fix all selected templates");
+            }
         }
 
         private void SearchResults_SelectionChanged(object sender, SelectionChangedEventArgs e)
