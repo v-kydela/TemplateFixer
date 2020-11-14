@@ -8,7 +8,7 @@ namespace TemplateFixer
 {
     internal static class AzHelper
     {
-        private const string ResourceName = "templatetest";
+        private const string ResourceName = "bfsetemplatefixer";
         private const string RgPrefix = ResourceName + "rg";
         private const string AppRegPrefix = ResourceName + "appreg";
         private const string Password = "AtLeastSixteenCharacters_0";
@@ -58,7 +58,7 @@ namespace TemplateFixer
 
                 if (result.ExitCode == 0)
                 {
-                    AzCliPath = result.Output;
+                    AzCliPath = result.Output.Split(Environment.NewLine).Last();
                 }
                 else
                 {
